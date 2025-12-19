@@ -1,0 +1,64 @@
+package todo
+
+import (
+	"net/http"
+	"strconv"
+
+	"github.com/go-playground/validator/v10"
+	"github.com/labstack/echo/v4"
+	"github.com/jobpay/todo/internal/application/usecase/todo"
+	todoRequest "github.com/jobpay/todo/internal/presentation/request/todo"
+	todoResponse "github.com/jobpay/todo/internal/presentation/response/todo"
+)
+
+type UpdateController struct {
+	updateUseCase *todo.UpdateUseCase
+	validator     *validator.Validate
+}
+
+func NewUpdateController(updateUseCase *todo.UpdateUseCase) *UpdateController {
+	return &UpdateController{
+		updateUseCase: updateUseCase,
+		validator:     validator.New(),
+	}
+}
+
+func (c *UpdateController) Handle(ctx echo.Context) error {
+	id, err := strconv.Atoi(ctx.Param("id"))
+	if err != nil {
+		return ctx.JSON(http.StatusBadRequest, map[string]string{
+			"error": "invalid id",
+		})
+	}
+
+	var req todoRequest.UpdateRequest
+	if err := ctx.Bind(&req); err != nil {
+		return ctx.JSON(http.StatusBadRequest, map[string]string{
+			"error": "invalid request body",
+		})
+	}
+
+	if err := c.validator.Struct(req); err != nil {
+		return ctx.JSON(http.StatusBadRequest, map[string]string{
+			"error": err.Error(),
+		})
+	}
+
+	input := todo.UpdateInput{
+		ID:          id,
+		Title:       req.Title,
+		Description: req.Description,
+		Completed:   req.Completed,
+		DueDate:     req.DueDate,
+	}
+	todoEntity, err := c.updateUseCase.Execute(input)
+	if err != nil {
+		return ctx.JSON(http.StatusBadRequest, map[string]string{
+			"error": err.Error(),
+		})
+	}
+
+	// レスポンス生成
+	response := todoResponse.FromEntity(todoEntity)
+	return ctx.JSON(http.StatusOK, response)
+}
