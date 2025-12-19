@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  mysql-test:
+    image: mysql:8.0
+    container_name: todo-mysql-test
+    ports:
+      - "3307:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_DATABASE=todo_app_test
+      - MYSQL_ROOT_HOST=%
+      - TZ=Asia/Tokyo
+    volumes:
+      - ./docker/mysql/my.cnf:/etc/mysql/conf.d/my.cnf
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-ppassword"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - todo-test-network
+
+networks:
+  todo-test-network:
+    driver: bridge
+
