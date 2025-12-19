@@ -1,0 +1,250 @@
+openapi: 3.0.3
+info:
+  title: TODO API
+  description: |-
+    ドメイン駆動設計で構築したTODO管理API
+    
+    このAPIはGolang + Echo + MySQLで実装されています。
+  version: 1.0.0
+  contact:
+    name: jobpay
+    url: https://github.com/jobpay/todo
+
+servers:
+  - url: http://localhost:8080/api
+    description: Development server
+
+tags:
+  - name: todos
+    description: TODO関連のエンドポイント
+
+paths:
+  /todos:
+    get:
+      tags:
+        - todos
+      summary: TODO一覧取得
+      description: 全てのTODOを取得します
+      operationId: listTodos
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TodoResponse'
+        '500':
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    
+    post:
+      tags:
+        - todos
+      summary: TODO作成
+      description: 新しいTODOを作成します
+      operationId: createTodo
+      requestBody:
+        description: TODO作成リクエスト
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StoreRequest'
+      responses:
+        '201':
+          description: 作成成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TodoResponse'
+        '400':
+          description: バリデーションエラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /todos/{id}:
+    get:
+      tags:
+        - todos
+      summary: TODO詳細取得
+      description: 指定されたIDのTODOを取得します
+      operationId: showTodo
+      parameters:
+        - name: id
+          in: path
+          description: TODO ID
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TodoResponse'
+        '404':
+          description: TODOが見つかりません
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    
+    put:
+      tags:
+        - todos
+      summary: TODO更新
+      description: 指定されたIDのTODOを更新します
+      operationId: updateTodo
+      parameters:
+        - name: id
+          in: path
+          description: TODO ID
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        description: TODO更新リクエスト
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateRequest'
+      responses:
+        '200':
+          description: 更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TodoResponse'
+        '400':
+          description: バリデーションエラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: TODOが見つかりません
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    
+    delete:
+      tags:
+        - todos
+      summary: TODO削除
+      description: 指定されたIDのTODOを削除します
+      operationId: deleteTodo
+      parameters:
+        - name: id
+          in: path
+          description: TODO ID
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: 削除成功
+        '404':
+          description: TODOが見つかりません
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    TodoResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        title:
+          type: string
+          example: "プロジェクトの実装"
+        description:
+          type: string
+          example: "ドメイン駆動設計でTODOアプリを実装する"
+        completed:
+          type: boolean
+          example: false
+        due_date:
+          type: string
+          format: date-time
+          example: "2025-12-31T23:59:59Z"
+        created_at:
+          type: string
+          format: date-time
+          example: "2025-11-22T10:00:00Z"
+        updated_at:
+          type: string
+          format: date-time
+          example: "2025-11-22T10:00:00Z"
+      required:
+        - id
+        - title
+        - completed
+        - due_date
+        - created_at
+        - updated_at
+
+    StoreRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 100
+          example: "プロジェクトの実装"
+        description:
+          type: string
+          maxLength: 500
+          example: "ドメイン駆動設計でTODOアプリを実装する"
+        due_date:
+          type: string
+          format: date-time
+          example: "2025-12-31T23:59:59Z"
+      required:
+        - title
+        - due_date
+
+    UpdateRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 100
+          example: "プロジェクトの実装"
+        description:
+          type: string
+          maxLength: 500
+          example: "ドメイン駆動設計でTODOアプリを実装する"
+        completed:
+          type: boolean
+          example: false
+        due_date:
+          type: string
+          format: date-time
+          example: "2025-12-31T23:59:59Z"
+      required:
+        - title
+        - completed
+        - due_date
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "エラーメッセージ"
+
