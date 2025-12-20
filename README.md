@@ -80,8 +80,8 @@ Golang + Echo + MySQL で構築したTODO管理APIです。ドメイン駆動設
 ### 1. リポジトリのクローン
 
 ```bash
-git clone https://github.com/jobpay/todo.git
-cd todo
+git clone https://github.com/jobpay/go-todo.git
+cd go-todo
 ```
 
 ### 2. 必要なツールのインストール
@@ -109,6 +109,16 @@ make migrate-up
 curl http://localhost:8080/health
 # {"status":"ok"}
 ```
+
+### 6. Swagger UIでAPIドキュメントを確認
+
+ブラウザで以下のURLにアクセス：
+
+```
+http://localhost:8081
+```
+
+Swagger UIからAPIの仕様確認と実際のリクエスト送信ができます。
 
 ## 使い方
 

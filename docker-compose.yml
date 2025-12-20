@@ -43,6 +43,19 @@ services:
     networks:
       - todo-network
 
+  swagger-ui:
+    image: swaggerapi/swagger-ui
+    container_name: todo-swagger-ui
+    ports:
+      - "8081:8080"
+    environment:
+      - SWAGGER_JSON=/swagger/swagger.yaml
+      - BASE_URL=/
+    volumes:
+      - ./docs/swagger.yaml:/swagger/swagger.yaml
+    networks:
+      - todo-network
+
 volumes:
   mysql-data:
 
