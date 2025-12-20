@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/jobpay/todo/internal/application/usecase/todo"
+	"github.com/jobpay/todo/internal/presentation/request"
 	todoRequest "github.com/jobpay/todo/internal/presentation/request/todo"
 	todoResponse "github.com/jobpay/todo/internal/presentation/response/todo"
 	"github.com/labstack/echo/v4"
@@ -36,8 +37,9 @@ func (c *UpdateController) Handle(ctx echo.Context) error {
 	}
 
 	if err := req.Validate(); err != nil {
-		return ctx.JSON(http.StatusBadRequest, map[string]string{
-			"error": err.Error(),
+		errors := request.ParseValidationErrors(err)
+		return ctx.JSON(http.StatusBadRequest, map[string]interface{}{
+			"errors": errors,
 		})
 	}
 
