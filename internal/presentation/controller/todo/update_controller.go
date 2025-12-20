@@ -4,22 +4,19 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/go-playground/validator/v10"
-	"github.com/labstack/echo/v4"
 	"github.com/jobpay/todo/internal/application/usecase/todo"
 	todoRequest "github.com/jobpay/todo/internal/presentation/request/todo"
 	todoResponse "github.com/jobpay/todo/internal/presentation/response/todo"
+	"github.com/labstack/echo/v4"
 )
 
 type UpdateController struct {
 	updateUseCase *todo.UpdateUseCase
-	validator     *validator.Validate
 }
 
 func NewUpdateController(updateUseCase *todo.UpdateUseCase) *UpdateController {
 	return &UpdateController{
 		updateUseCase: updateUseCase,
-		validator:     validator.New(),
 	}
 }
 
@@ -38,7 +35,7 @@ func (c *UpdateController) Handle(ctx echo.Context) error {
 		})
 	}
 
-	if err := c.validator.Struct(req); err != nil {
+	if err := req.Validate(); err != nil {
 		return ctx.JSON(http.StatusBadRequest, map[string]string{
 			"error": err.Error(),
 		})
