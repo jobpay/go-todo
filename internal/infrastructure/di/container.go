@@ -3,10 +3,10 @@ package di
 import (
 	"log"
 
-	"github.com/labstack/echo/v4"
 	"github.com/jobpay/todo/internal/domain/repository"
 	"github.com/jobpay/todo/internal/infrastructure/database"
 	todoPersistence "github.com/jobpay/todo/internal/infrastructure/persistence/todo"
+	"github.com/labstack/echo/v4"
 	"go.uber.org/dig"
 	"gorm.io/gorm"
 
