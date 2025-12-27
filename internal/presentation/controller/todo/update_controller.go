@@ -57,7 +57,6 @@ func (c *UpdateController) Handle(ctx echo.Context) error {
 		})
 	}
 
-	// レスポンス生成
 	response := todoResponse.FromEntity(todoEntity)
 	return ctx.JSON(http.StatusOK, response)
 }

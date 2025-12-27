@@ -1,19 +1,12 @@
 package router
 
 import (
+	"github.com/jobpay/todo/internal/presentation/controller"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	todoController "github.com/jobpay/todo/internal/presentation/controller/todo"
 )
 
-func Setup(
-	e *echo.Echo,
-	showController *todoController.ShowController,
-	listController *todoController.ListController,
-	storeController *todoController.StoreController,
-	updateController *todoController.UpdateController,
-	deleteController *todoController.DeleteController,
-) {
+func Setup(e *echo.Echo, controllers *controller.Controllers) {
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORS())
@@ -22,16 +15,15 @@ func Setup(
 		return c.JSON(200, map[string]string{"status": "ok"})
 	})
 
-	// APIルート
 	api := e.Group("/api")
 	{
 		todos := api.Group("/todos")
 		{
-			todos.GET("", listController.Handle)
-			todos.GET("/:id", showController.Handle)
-			todos.POST("", storeController.Handle)
-			todos.PUT("/:id", updateController.Handle)
-			todos.DELETE("/:id", deleteController.Handle)
+			todos.GET("", controllers.Todo.List.Handle)
+			todos.GET("/:id", controllers.Todo.Show.Handle)
+			todos.POST("", controllers.Todo.Store.Handle)
+			todos.PUT("/:id", controllers.Todo.Update.Handle)
+			todos.DELETE("/:id", controllers.Todo.Delete.Handle)
 		}
 	}
 }

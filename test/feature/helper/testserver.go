@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/jobpay/todo/internal/infrastructure/di"
-	todoController "github.com/jobpay/todo/internal/presentation/controller/todo"
+	"github.com/jobpay/todo/internal/presentation/controller"
 	"github.com/jobpay/todo/internal/router"
 	"github.com/labstack/echo/v4"
 	"gorm.io/driver/mysql"
@@ -35,13 +35,9 @@ func StartTestServer() error {
 
 		err := container.Invoke(func(
 			e *echo.Echo,
-			showController *todoController.ShowController,
-			listController *todoController.ListController,
-			storeController *todoController.StoreController,
-			updateController *todoController.UpdateController,
-			deleteController *todoController.DeleteController,
+			controllers *controller.Controllers,
 		) {
-			router.Setup(e, showController, listController, storeController, updateController, deleteController)
+			router.Setup(e, controllers)
 
 			e.HideBanner = true
 			if err := e.Start(TestServerPort); err != nil && err != http.ErrServerClosed {

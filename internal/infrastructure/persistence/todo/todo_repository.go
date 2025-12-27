@@ -5,7 +5,7 @@ import (
 
 	"github.com/jobpay/todo/internal/domain/entity/todo"
 	"github.com/jobpay/todo/internal/domain/entity/todo/valueobject"
-	"github.com/jobpay/todo/internal/domain/repository"
+	impl "github.com/jobpay/todo/internal/domain/repository"
 	"gorm.io/gorm"
 )
 
@@ -13,7 +13,7 @@ type todoRepository struct {
 	db *gorm.DB
 }
 
-func NewTodoRepository(db *gorm.DB) repository.TodoRepository {
+func NewTodoRepository(db *gorm.DB) impl.TodoRepository {
 	return &todoRepository{db: db}
 }
 

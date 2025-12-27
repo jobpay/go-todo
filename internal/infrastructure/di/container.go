@@ -3,15 +3,7 @@ package di
 import (
 	"log"
 
-	"github.com/jobpay/todo/internal/domain/repository"
-	"github.com/jobpay/todo/internal/infrastructure/database"
-	todoPersistence "github.com/jobpay/todo/internal/infrastructure/persistence/todo"
-	"github.com/labstack/echo/v4"
 	"go.uber.org/dig"
-	"gorm.io/gorm"
-
-	todoUseCase "github.com/jobpay/todo/internal/application/usecase/todo"
-	todoController "github.com/jobpay/todo/internal/presentation/controller/todo"
 )
 
 type Container struct {
@@ -25,54 +17,19 @@ func NewContainer() *Container {
 }
 
 func (c *Container) Build() error {
-	if err := c.container.Provide(func() (*gorm.DB, error) {
-		config := database.LoadConfigFromEnv()
-		return database.NewMySQLDB(config)
-	}); err != nil {
+	if err := c.provideInfrastructure(); err != nil {
 		return err
 	}
 
-	if err := c.container.Provide(func(db *gorm.DB) repository.TodoRepository {
-		return todoPersistence.NewTodoRepository(db)
-	}); err != nil {
+	if err := c.provideRepositories(); err != nil {
 		return err
 	}
 
-	if err := c.container.Provide(todoUseCase.NewShowUseCase); err != nil {
-		return err
-	}
-	if err := c.container.Provide(todoUseCase.NewListUseCase); err != nil {
-		return err
-	}
-	if err := c.container.Provide(todoUseCase.NewStoreUseCase); err != nil {
-		return err
-	}
-	if err := c.container.Provide(todoUseCase.NewUpdateUseCase); err != nil {
-		return err
-	}
-	if err := c.container.Provide(todoUseCase.NewDeleteUseCase); err != nil {
+	if err := c.provideUseCases(); err != nil {
 		return err
 	}
 
-	if err := c.container.Provide(todoController.NewShowController); err != nil {
-		return err
-	}
-	if err := c.container.Provide(todoController.NewListController); err != nil {
-		return err
-	}
-	if err := c.container.Provide(todoController.NewStoreController); err != nil {
-		return err
-	}
-	if err := c.container.Provide(todoController.NewUpdateController); err != nil {
-		return err
-	}
-	if err := c.container.Provide(todoController.NewDeleteController); err != nil {
-		return err
-	}
-
-	if err := c.container.Provide(func() *echo.Echo {
-		return echo.New()
-	}); err != nil {
+	if err := c.provideControllers(); err != nil {
 		return err
 	}
 
