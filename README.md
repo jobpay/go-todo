@@ -198,6 +198,26 @@ make test-all
 make mock
 ```
 
+## CI/CD
+
+GitHub Actionsで自動化されています：
+
+### ワークフロー
+
+1. **Test** (`test.yml`)
+   - ユニットテストと統合テストを実行
+   - MySQL 8.0サービスコンテナを使用
+   - カバレッジレポートを生成
+
+2. **Build** (`build.yml`)
+   - ビルド可能性の検証
+   - バイナリの生成確認
+
+### トリガー
+
+- `main`、`develop`ブランチへのpush
+- `main`、`develop`ブランチへのPull Request
+
 
 ## アーキテクチャ
 
