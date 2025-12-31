@@ -6,19 +6,17 @@ import (
 )
 
 type DeleteUseCase struct {
-	repo repository.TagRepository
+	tagRepo repository.TagRepository
 }
 
-func NewDeleteUseCase(repo repository.TagRepository) *DeleteUseCase {
-	return &DeleteUseCase{repo: repo}
+func NewDeleteUseCase(tagRepo repository.TagRepository) *DeleteUseCase {
+	return &DeleteUseCase{tagRepo: tagRepo}
 }
 
-func (uc *DeleteUseCase) Execute(id int) error {
+func (u *DeleteUseCase) Execute(id int) error {
 	tagID, err := valueobject.NewID(id)
 	if err != nil {
 		return err
 	}
-
-	return uc.repo.Delete(tagID)
+	return u.tagRepo.Delete(tagID)
 }
-

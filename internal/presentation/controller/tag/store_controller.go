@@ -34,7 +34,11 @@ func (ctrl *StoreController) Handle(c echo.Context) error {
 		})
 	}
 
-	result, err := ctrl.useCase.Execute(req.Title)
+	input := tagUseCase.StoreInput{
+		Title: req.Title,
+	}
+
+	result, err := ctrl.useCase.Execute(input)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{
 			"error": err.Error(),
@@ -43,4 +47,3 @@ func (ctrl *StoreController) Handle(c echo.Context) error {
 
 	return c.JSON(http.StatusCreated, tagResponse.FromEntity(result))
 }
-

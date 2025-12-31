@@ -7,35 +7,39 @@ import (
 )
 
 type UpdateUseCase struct {
-	repo repository.TagRepository
+	tagRepo repository.TagRepository
 }
 
-func NewUpdateUseCase(repo repository.TagRepository) *UpdateUseCase {
-	return &UpdateUseCase{repo: repo}
+type UpdateInput struct {
+	ID    int
+	Title string
 }
 
-func (uc *UpdateUseCase) Execute(id int, title string) (*tag.Tag, error) {
-	tagID, err := valueobject.NewID(id)
+func NewUpdateUseCase(tagRepo repository.TagRepository) *UpdateUseCase {
+	return &UpdateUseCase{tagRepo: tagRepo}
+}
+
+func (u *UpdateUseCase) Execute(input UpdateInput) (*tag.Tag, error) {
+	id, err := valueobject.NewID(input.ID)
 	if err != nil {
 		return nil, err
 	}
 
-	tag, err := uc.repo.FindByID(tagID)
+	tag, err := u.tagRepo.FindByID(id)
 	if err != nil {
 		return nil, err
 	}
 
-	titleVO, err := valueobject.NewTitle(title)
+	title, err := valueobject.NewTitle(input.Title)
 	if err != nil {
 		return nil, err
 	}
 
-	tag.Update(titleVO)
+	tag.Update(title)
 
-	if err := uc.repo.Update(tag); err != nil {
+	if err := u.tagRepo.Update(tag); err != nil {
 		return nil, err
 	}
 
 	return tag, nil
 }
-

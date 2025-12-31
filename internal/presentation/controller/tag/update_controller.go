@@ -42,7 +42,12 @@ func (ctrl *UpdateController) Handle(c echo.Context) error {
 		})
 	}
 
-	result, err := ctrl.useCase.Execute(id, req.Title)
+	input := tagUseCase.UpdateInput{
+		ID:    id,
+		Title: req.Title,
+	}
+
+	result, err := ctrl.useCase.Execute(input)
 	if err != nil {
 		if err.Error() == "tag not found" {
 			return c.JSON(http.StatusNotFound, map[string]string{
@@ -56,4 +61,3 @@ func (ctrl *UpdateController) Handle(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, tagResponse.FromEntity(result))
 }
-

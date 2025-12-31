@@ -7,25 +7,28 @@ import (
 )
 
 type StoreUseCase struct {
-	repo repository.TagRepository
+	tagRepo repository.TagRepository
 }
 
-func NewStoreUseCase(repo repository.TagRepository) *StoreUseCase {
-	return &StoreUseCase{repo: repo}
+type StoreInput struct {
+	Title string
 }
 
-func (uc *StoreUseCase) Execute(title string) (*tag.Tag, error) {
-	titleVO, err := valueobject.NewTitle(title)
+func NewStoreUseCase(tagRepo repository.TagRepository) *StoreUseCase {
+	return &StoreUseCase{tagRepo: tagRepo}
+}
+
+func (u *StoreUseCase) Execute(input StoreInput) (*tag.Tag, error) {
+	title, err := valueobject.NewTitle(input.Title)
 	if err != nil {
 		return nil, err
 	}
 
-	newTag := tag.NewTag(titleVO)
+	newTag := tag.NewTag(title)
 
-	if err := uc.repo.Save(newTag); err != nil {
+	if err := u.tagRepo.Save(newTag); err != nil {
 		return nil, err
 	}
 
 	return newTag, nil
 }
-

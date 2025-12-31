@@ -6,14 +6,13 @@ import (
 )
 
 type ListUseCase struct {
-	repo repository.TagRepository
+	tagRepo repository.TagRepository
 }
 
-func NewListUseCase(repo repository.TagRepository) *ListUseCase {
-	return &ListUseCase{repo: repo}
+func NewListUseCase(tagRepo repository.TagRepository) *ListUseCase {
+	return &ListUseCase{tagRepo: tagRepo}
 }
 
-func (uc *ListUseCase) Execute() ([]*tag.Tag, error) {
-	return uc.repo.FindAll()
+func (u *ListUseCase) Execute() ([]*tag.Tag, error) {
+	return u.tagRepo.FindAll()
 }
-
