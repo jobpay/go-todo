@@ -47,14 +47,14 @@ test: ## ユニットテストを実行
 
 .PHONY: test-feature
 test-feature: ## Feature Testを実行
-	go test -v ./test/feature/todo/...
+	go test -v ./test/feature/...
 
 .PHONY: test-all
 test-all: test-up ## 全てのテストを実行
 	@echo "Waiting for test database..."
 	@sleep 5
 	migrate -path db/migrations -database "mysql://root:password@tcp(localhost:3307)/todo_app_test" up
-	go test -v ./test/unit/... ./test/feature/todo/...
+	go test -v ./test/unit/... ./test/feature/...
 	$(MAKE) test-down
 
 .PHONY: build
@@ -72,7 +72,12 @@ clean: ## クリーンアップ
 
 .PHONY: mock
 mock: ## モックを生成
-	mockgen -source=internal/domain/repository/todo_repository.go -destination=test/mock/mock_todo_repository.go
+	@echo "Generating mocks..."
+	@for file in internal/domain/repository/*_repository.go; do \
+		filename=$$(basename $$file); \
+		mockgen -source=$$file -destination=test/mock/mock_$$filename -package=mock; \
+		echo "Generated test/mock/mock_$$filename"; \
+	done
 
 .PHONY: lint
 lint: ## Lintを実行
