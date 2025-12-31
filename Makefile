@@ -47,14 +47,15 @@ test: ## ユニットテストを実行
 
 .PHONY: test-feature
 test-feature: ## Feature Testを実行
-	go test -v ./test/feature/...
+	go test -v -p 1 ./test/feature/...
 
 .PHONY: test-all
 test-all: test-up ## 全てのテストを実行
 	@echo "Waiting for test database..."
 	@sleep 5
 	migrate -path db/migrations -database "mysql://root:password@tcp(localhost:3307)/todo_app_test" up
-	go test -v ./test/unit/... ./test/feature/...
+	go test -v ./test/unit/...
+	go test -v -p 1 ./test/feature/...
 	$(MAKE) test-down
 
 .PHONY: build
