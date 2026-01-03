@@ -2,6 +2,7 @@ package di
 
 import (
 	"github.com/jobpay/todo/internal/presentation/controller"
+	tagController "github.com/jobpay/todo/internal/presentation/controller/tag"
 	todoController "github.com/jobpay/todo/internal/presentation/controller/todo"
 )
 
@@ -13,6 +14,12 @@ func (c *Container) provideControllers() error {
 		todoController.NewUpdateController,
 		todoController.NewDeleteController,
 		todoController.NewControllers,
+		tagController.NewShowController,
+		tagController.NewListController,
+		tagController.NewStoreController,
+		tagController.NewUpdateController,
+		tagController.NewDeleteController,
+		tagController.NewControllers,
 		controller.NewControllers,
 	}
 

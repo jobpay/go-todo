@@ -17,6 +17,8 @@ servers:
 tags:
   - name: todos
     description: TODO関連のエンドポイント
+  - name: tags
+    description: タグ関連のエンドポイント
 
 paths:
   /todos:
@@ -160,6 +162,147 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  /tags:
+    get:
+      tags:
+        - tags
+      summary: タグ一覧取得
+      description: 全てのタグを取得します
+      operationId: listTags
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TagResponse'
+        '500':
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    
+    post:
+      tags:
+        - tags
+      summary: タグ作成
+      description: 新しいタグを作成します
+      operationId: createTag
+      requestBody:
+        description: タグ作成リクエスト
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TagStoreRequest'
+      responses:
+        '201':
+          description: 作成成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TagResponse'
+        '400':
+          description: バリデーションエラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /tags/{id}:
+    get:
+      tags:
+        - tags
+      summary: タグ詳細取得
+      description: 指定されたIDのタグを取得します
+      operationId: showTag
+      parameters:
+        - name: id
+          in: path
+          description: タグ ID
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TagResponse'
+        '404':
+          description: タグが見つかりません
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    
+    put:
+      tags:
+        - tags
+      summary: タグ更新
+      description: 指定されたIDのタグを更新します
+      operationId: updateTag
+      parameters:
+        - name: id
+          in: path
+          description: タグ ID
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        description: タグ更新リクエスト
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TagUpdateRequest'
+      responses:
+        '200':
+          description: 更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TagResponse'
+        '400':
+          description: バリデーションエラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: タグが見つかりません
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    
+    delete:
+      tags:
+        - tags
+      summary: タグ削除
+      description: 指定されたIDのタグを削除します
+      operationId: deleteTag
+      parameters:
+        - name: id
+          in: path
+          description: タグ ID
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: 削除成功
+        '404':
+          description: タグが見つかりません
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
 components:
   schemas:
     TodoResponse:
@@ -240,6 +383,51 @@ components:
         - title
         - completed
         - due_date
+
+    TagResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        title:
+          type: string
+          example: "urgent"
+        created_at:
+          type: string
+          format: date-time
+          example: "2025-11-22T10:00:00Z"
+        updated_at:
+          type: string
+          format: date-time
+          example: "2025-11-22T10:00:00Z"
+      required:
+        - id
+        - title
+        - created_at
+        - updated_at
+
+    TagStoreRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 100
+          example: "urgent"
+      required:
+        - title
+
+    TagUpdateRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 100
+          example: "high-priority"
+      required:
+        - title
 
     Error:
       type: object

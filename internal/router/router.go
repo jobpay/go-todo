@@ -25,5 +25,14 @@ func Setup(e *echo.Echo, controllers *controller.Controllers) {
 			todos.PUT("/:id", controllers.Todo.Update.Handle)
 			todos.DELETE("/:id", controllers.Todo.Delete.Handle)
 		}
+
+		tags := api.Group("/tags")
+		{
+			tags.GET("", controllers.Tag.List.Handle)
+			tags.GET("/:id", controllers.Tag.Show.Handle)
+			tags.POST("", controllers.Tag.Store.Handle)
+			tags.PUT("/:id", controllers.Tag.Update.Handle)
+			tags.DELETE("/:id", controllers.Tag.Delete.Handle)
+		}
 	}
 }
