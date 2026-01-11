@@ -40,5 +40,7 @@ func setupTestEnvironment() error {
 }
 
 func cleanupDB() {
+	helper.CleanupTable(testDB, "todo_tags")
 	helper.CleanupTable(testDB, "todos")
+	helper.CleanupTable(testDB, "tags")
 }

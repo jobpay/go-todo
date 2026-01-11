@@ -15,7 +15,7 @@ import (
 func TestDeleteTodo(t *testing.T) {
 	cleanupDB()
 
-	fixedTime := time.Date(2025, 12, 31, 23, 59, 59, 0, time.UTC)
+	fixedTime := time.Date(2026, 12, 31, 23, 59, 59, 0, time.UTC)
 
 	createReq := todoRequest.StoreRequest{
 		Title:       "Delete Test TODO",

@@ -39,6 +39,7 @@ func (c *StoreController) Handle(ctx echo.Context) error {
 		Title:       req.Title,
 		Description: req.Description,
 		DueDate:     req.DueDate,
+		TagIDs:      req.TagIDs,
 	}
 	todoEntity, err := c.storeUseCase.Execute(input)
 	if err != nil {

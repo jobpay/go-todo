@@ -14,8 +14,8 @@ import (
 func TestListTodos(t *testing.T) {
 	cleanupDB()
 
-	fixedTime1 := time.Date(2025, 12, 31, 23, 59, 59, 0, time.UTC)
-	fixedTime2 := time.Date(2026, 1, 15, 12, 0, 0, 0, time.UTC)
+	fixedTime1 := time.Date(2026, 12, 31, 23, 59, 59, 0, time.UTC)
+	fixedTime2 := time.Date(2027, 1, 15, 12, 0, 0, 0, time.UTC)
 
 	testTodos := []todoRequest.StoreRequest{
 		{
@@ -105,6 +105,62 @@ func TestListTodos(t *testing.T) {
 			for title := range expectedTodos {
 				t.Errorf("Expected TODO '%s' not found in response", title)
 			}
+		}
+	})
+
+	t.Run("正常系: タグ付きTODO一覧を取得できる", func(t *testing.T) {
+		cleanupDB()
+
+		tagReqBody := map[string]string{"title": "list-test-tag"}
+		tagJson, _ := json.Marshal(tagReqBody)
+		tagResp, _ := httpClient.Post(
+			testServerURL+"/api/tags",
+			"application/json",
+			bytes.NewBuffer(tagJson),
+		)
+		var tagResponse map[string]interface{}
+		json.NewDecoder(tagResp.Body).Decode(&tagResponse)
+		tagResp.Body.Close()
+		tagID := int(tagResponse["id"].(float64))
+
+		reqBody := map[string]interface{}{
+			"title":       "Tagged List TODO",
+			"description": "TODO with tags for list",
+			"due_date":    fixedTime1,
+			"tag_ids":     []int{tagID},
+		}
+		jsonBody, _ := json.Marshal(reqBody)
+		httpClient.Post(testServerURL+"/api/todos", "application/json", bytes.NewBuffer(jsonBody))
+
+		resp, err := httpClient.Get(testServerURL + "/api/todos")
+		if err != nil {
+			t.Fatalf("Failed to send request: %v", err)
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode != http.StatusOK {
+			t.Errorf("Expected status %d, got %d", http.StatusOK, resp.StatusCode)
+		}
+
+		var response []todoResponse.TodoResponse
+		if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
+			t.Fatalf("Failed to decode response: %v", err)
+		}
+
+		if len(response) != 1 {
+			t.Fatalf("Expected 1 TODO, got %d", len(response))
+		}
+
+		if len(response[0].Tags) != 1 {
+			t.Errorf("Expected 1 tag, got %d", len(response[0].Tags))
+		}
+
+		if response[0].Tags[0].ID != tagID {
+			t.Errorf("Expected tag ID %d, got %d", tagID, response[0].Tags[0].ID)
+		}
+
+		if response[0].Tags[0].Title != "list-test-tag" {
+			t.Errorf("Expected tag title 'list-test-tag', got '%s'", response[0].Tags[0].Title)
 		}
 	})
 

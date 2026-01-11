@@ -6,6 +6,7 @@ import (
 	"github.com/jobpay/todo/internal/domain/entity/todo"
 	"github.com/jobpay/todo/internal/domain/entity/todo/valueobject"
 	impl "github.com/jobpay/todo/internal/domain/repository"
+	tagPersistence "github.com/jobpay/todo/internal/infrastructure/persistence/tag"
 	"gorm.io/gorm"
 )
 
@@ -19,6 +20,13 @@ func NewTodoRepository(db *gorm.DB) impl.TodoRepository {
 
 func (r *todoRepository) Save(todo *todo.Todo) error {
 	model := FromEntity(todo)
+
+	tagModels := make([]tagPersistence.TagModel, len(todo.Tags))
+	for i, tag := range todo.Tags {
+		tagModels[i] = *tagPersistence.FromEntity(tag)
+	}
+	model.Tags = tagModels
+
 	if err := r.db.Create(model).Error; err != nil {
 		return err
 	}
@@ -28,7 +36,7 @@ func (r *todoRepository) Save(todo *todo.Todo) error {
 
 func (r *todoRepository) FindByID(id valueobject.ID) (*todo.Todo, error) {
 	var model TodoModel
-	if err := r.db.First(&model, id.Int()).Error; err != nil {
+	if err := r.db.Preload("Tags").First(&model, id.Int()).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errors.New("todo not found")
 		}
@@ -39,7 +47,7 @@ func (r *todoRepository) FindByID(id valueobject.ID) (*todo.Todo, error) {
 
 func (r *todoRepository) FindAll() ([]*todo.Todo, error) {
 	var models []TodoModel
-	if err := r.db.Order("created_at DESC").Find(&models).Error; err != nil {
+	if err := r.db.Preload("Tags").Order("created_at DESC").Find(&models).Error; err != nil {
 		return nil, err
 	}
 
@@ -51,15 +59,35 @@ func (r *todoRepository) FindAll() ([]*todo.Todo, error) {
 }
 
 func (r *todoRepository) Update(todo *todo.Todo) error {
-	model := FromEntity(todo)
-	result := r.db.Model(&TodoModel{}).Where("id = ?", todo.ID.Int()).Updates(model)
-	if result.Error != nil {
-		return result.Error
-	}
-	if result.RowsAffected == 0 {
-		return errors.New("todo not found")
-	}
-	return nil
+	return r.db.Transaction(func(tx *gorm.DB) error {
+		model := FromEntity(todo)
+		result := tx.Model(&TodoModel{}).Where("id = ?", todo.ID.Int()).Updates(model)
+		if result.Error != nil {
+			return result.Error
+		}
+		if result.RowsAffected == 0 {
+			return errors.New("todo not found")
+		}
+
+		if err := tx.Where("todo_id = ?", todo.ID.Int()).Delete(&TodoTagModel{}).Error; err != nil {
+			return err
+		}
+
+		if len(todo.Tags) > 0 {
+			tagModels := make([]TodoTagModel, len(todo.Tags))
+			for i, tag := range todo.Tags {
+				tagModels[i] = TodoTagModel{
+					TodoID: todo.ID.Int(),
+					TagID:  tag.ID.Int(),
+				}
+			}
+			if err := tx.Create(&tagModels).Error; err != nil {
+				return err
+			}
+		}
+
+		return nil
+	})
 }
 
 func (r *todoRepository) Delete(id valueobject.ID) error {
