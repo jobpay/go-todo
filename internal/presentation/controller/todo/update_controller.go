@@ -49,6 +49,7 @@ func (c *UpdateController) Handle(ctx echo.Context) error {
 		Description: req.Description,
 		Completed:   req.Completed,
 		DueDate:     req.DueDate,
+		TagIDs:      req.TagIDs,
 	}
 	todoEntity, err := c.updateUseCase.Execute(input)
 	if err != nil {

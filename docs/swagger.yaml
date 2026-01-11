@@ -324,6 +324,10 @@ components:
           type: string
           format: date-time
           example: "2025-12-31T23:59:59Z"
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/Tag'
         created_at:
           type: string
           format: date-time
@@ -337,6 +341,7 @@ components:
         - title
         - completed
         - due_date
+        - tags
         - created_at
         - updated_at
 
@@ -356,6 +361,11 @@ components:
           type: string
           format: date-time
           example: "2025-12-31T23:59:59Z"
+        tag_ids:
+          type: array
+          items:
+            type: integer
+          example: [1, 2]
       required:
         - title
         - due_date
@@ -379,6 +389,11 @@ components:
           type: string
           format: date-time
           example: "2025-12-31T23:59:59Z"
+        tag_ids:
+          type: array
+          items:
+            type: integer
+          example: [1, 2]
       required:
         - title
         - completed
@@ -427,6 +442,19 @@ components:
           maxLength: 100
           example: "high-priority"
       required:
+        - title
+
+    Tag:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        title:
+          type: string
+          example: "urgent"
+      required:
+        - id
         - title
 
     Error:

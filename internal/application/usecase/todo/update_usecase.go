@@ -3,6 +3,8 @@ package todo
 import (
 	"time"
 
+	"github.com/jobpay/todo/internal/domain/entity/tag"
+	tagValueObject "github.com/jobpay/todo/internal/domain/entity/tag/valueobject"
 	"github.com/jobpay/todo/internal/domain/entity/todo"
 	"github.com/jobpay/todo/internal/domain/entity/todo/valueobject"
 	"github.com/jobpay/todo/internal/domain/repository"
@@ -10,6 +12,7 @@ import (
 
 type UpdateUseCase struct {
 	todoRepo repository.TodoRepository
+	tagRepo  repository.TagRepository
 }
 
 type UpdateInput struct {
@@ -18,11 +21,13 @@ type UpdateInput struct {
 	Description string
 	Completed   bool
 	DueDate     time.Time
+	TagIDs      []int
 }
 
-func NewUpdateUseCase(todoRepo repository.TodoRepository) *UpdateUseCase {
+func NewUpdateUseCase(todoRepo repository.TodoRepository, tagRepo repository.TagRepository) *UpdateUseCase {
 	return &UpdateUseCase{
 		todoRepo: todoRepo,
+		tagRepo:  tagRepo,
 	}
 }
 
@@ -47,13 +52,20 @@ func (u *UpdateUseCase) Execute(input UpdateInput) (*todo.Todo, error) {
 		return nil, err
 	}
 
-	existingTodo.Update(title, description, input.DueDate)
-
-	if input.Completed {
-		existingTodo.Complete()
-	} else {
-		existingTodo.Reopen()
+	tags := make([]*tag.Tag, 0, len(input.TagIDs))
+	for _, tagID := range input.TagIDs {
+		tagIDVO, err := tagValueObject.NewID(tagID)
+		if err != nil {
+			return nil, err
+		}
+		tag, err := u.tagRepo.FindByID(tagIDVO)
+		if err != nil {
+			return nil, err
+		}
+		tags = append(tags, tag)
 	}
+
+	existingTodo.Update(title, description, input.Completed, input.DueDate, tags)
 
 	if err := u.todoRepo.Update(existingTodo); err != nil {
 		return nil, err
