@@ -21,6 +21,19 @@ services:
     networks:
       - todo-test-network
 
+  redis-test:
+    image: redis:7-alpine
+    container_name: todo-redis-test
+    ports:
+      - "6380:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - todo-test-network
+
 networks:
   todo-test-network:
     driver: bridge
