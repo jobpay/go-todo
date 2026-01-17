@@ -19,6 +19,8 @@ tags:
     description: TODO関連のエンドポイント
   - name: tags
     description: タグ関連のエンドポイント
+  - name: auth
+    description: 認証関連のエンドポイント
 
 paths:
   /todos:
@@ -302,6 +304,68 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  
+  /auth/register:
+    post:
+      tags:
+        - auth
+      summary: ユーザー登録
+      description: 新しいユーザーを登録します
+      operationId: register
+      requestBody:
+        description: ユーザー登録リクエスト
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: 登録成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '400':
+          description: バリデーションエラーまたはメールアドレス重複
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  
+  /auth/me:
+    get:
+      tags:
+        - auth
+      summary: 現在のユーザー情報取得
+      description: ログイン中のユーザー情報を取得します（Phase 3でJWT実装後はトークンから自動取得）
+      operationId: getMe
+      parameters:
+        - name: user_id
+          in: query
+          description: ユーザーID（Phase 3まで一時的にクエリパラメータで受け取る）
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '400':
+          description: バリデーションエラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: ユーザーが見つかりません
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
 components:
   schemas:
@@ -463,4 +527,43 @@ components:
         error:
           type: string
           example: "エラーメッセージ"
+    
+    UserResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        email:
+          type: string
+          format: email
+          example: "user@example.com"
+        name:
+          type: string
+          example: "山田太郎"
+        created_at:
+          type: string
+          format: date-time
+          example: "2025-01-01T00:00:00Z"
+        updated_at:
+          type: string
+          format: date-time
+          example: "2025-01-01T00:00:00Z"
+    
+    RegisterRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 255
+          example: "user@example.com"
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          example: "山田太郎"
+      required:
+        - email
+        - name
 

@@ -34,5 +34,11 @@ func Setup(e *echo.Echo, controllers *controller.Controllers) {
 			tags.PUT("/:id", controllers.Tag.Update.Handle)
 			tags.DELETE("/:id", controllers.Tag.Delete.Handle)
 		}
+
+		auth := api.Group("/auth")
+		{
+			auth.POST("/register", controllers.Auth.Register.Handle)
+			auth.GET("/me", controllers.Auth.GetMe.Handle)
+		}
 	}
 }
